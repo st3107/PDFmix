@@ -1,11 +1,16 @@
 name: test
 channels:
+  - diffpy
   - conda-forge
   - defaults
 dependencies:
+  - python>=3
   - codecov
   - coverage
   - flake8
   - pytest
   - sphinx
   - twine
+  - diffpy.srreal
+  - pyobjcryst
+  - xarray
