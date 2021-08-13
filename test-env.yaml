@@ -1,10 +1,10 @@
 name: test
 channels:
   - diffpy
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
-  - python>=3
+  - python>=3.7
   - codecov
   - coverage
   - flake8
@@ -15,3 +15,5 @@ dependencies:
   - pyobjcryst
   - xarray
   - fire
+  - pyyaml
+  - tqdm
