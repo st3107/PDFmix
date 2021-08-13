@@ -262,12 +262,12 @@ def create_mixture_pdf(
 
 def save_mixture_pdf(
         mixture_pdf: xr.Dataset,
-        out_directory: str,
-        count: int,
-        pattern: str
+        directory: str,
+        pattern: str,
+        count: int
 ) -> None:
     filename = pattern.format(count)
-    filepath = PurePath(out_directory).joinpath(filename)
+    filepath = PurePath(directory).joinpath(filename)
     mixture_pdf.to_netcdf(filepath)
     return
 
@@ -302,7 +302,7 @@ def create_mixture_pdf_files_from_cif_directory(
                 for calc_setting in calc_settings:
                     count = next(counts)
                     mixture_pdf = create_mixture_pdf(file_comb, frac_comb, stru_setting, calc_setting)
-                    save_mixture_pdf(mixture_pdf, output_directory, count, output_pattern)
+                    save_mixture_pdf(mixture_pdf, output_directory, output_pattern, count)
     return
 
 
