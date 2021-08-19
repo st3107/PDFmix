@@ -339,14 +339,22 @@ def create_mixture_pdf_files_from_cif_directory(
     _output_directory = Path(output_directory).expanduser()
     _input_directory = Path(input_directory).expanduser()
     config = load_config(config_file, **kwargs)
+    verbose = config.verbose
     files = find_all_files(str(_input_directory), input_pattern)
+    if verbose:
+        print("Find {} file(s) in the input directory.".format(len(files)))
     file_combs = gen_file_combs_from_directory(config, files)
     frac_combs = config.frac_combs
     stru_settings = config.stru_settings
     calc_settings = config.calc_settings
-    _output_directory.mkdir(parents=True, exist_ok=True)
+    if not _output_directory.is_dir():
+        _output_directory.mkdir(parents=True)
+        if verbose:
+            print("Create the directory {}.".format(str(_output_directory)))
     pb = create_progress_bar(files, config)
     count = 0
+    if verbose:
+        print("Begin calculation.")
     for file_comb in file_combs:
         for frac_comb in frac_combs:
             for stru_setting in stru_settings:
