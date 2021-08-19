@@ -1,3 +1,4 @@
+import time
 import typing
 import math
 import itertools as it
@@ -313,7 +314,7 @@ def save_mixture_pdf(
     return
 
 
-def create_counts(files: typing.List[str], config: PDFMixConfigParser) -> iter:
+def create_progress_bar(files: typing.List[str], config: PDFMixConfigParser) -> tqdm.tqdm:
     nfs = len(files)
     nph = config.n_phase
     if nfs < nph:
@@ -322,8 +323,9 @@ def create_counts(files: typing.List[str], config: PDFMixConfigParser) -> iter:
     nf = len(config.frac_combs)
     ns = len(config.stru_settings)
     nc = len(config.calc_settings)
-    counts = range(ncomb * nf * ns * nc)
-    return iter(tqdm.tqdm(counts)) if config.verbose > 0 else iter(counts)
+    counts = ncomb * nf * ns * nc
+    verbose = config.verbose
+    return tqdm.tqdm(total=counts, disable=(verbose == 0))
 
 
 def create_mixture_pdf_files_from_cif_directory(
@@ -338,19 +340,22 @@ def create_mixture_pdf_files_from_cif_directory(
     _input_directory = Path(input_directory).expanduser()
     config = load_config(config_file, **kwargs)
     files = find_all_files(str(_input_directory), input_pattern)
-    counts = create_counts(files, config)
     file_combs = gen_file_combs_from_directory(config, files)
     frac_combs = config.frac_combs
     stru_settings = config.stru_settings
     calc_settings = config.calc_settings
     _output_directory.mkdir(parents=True, exist_ok=True)
+    pb = create_progress_bar(files, config)
+    count = 0
     for file_comb in file_combs:
         for frac_comb in frac_combs:
             for stru_setting in stru_settings:
                 for calc_setting in calc_settings:
-                    count = next(counts)
+                    pb.update()
                     mixture_pdf = create_mixture_pdf(file_comb, frac_comb, stru_setting, calc_setting)
                     save_mixture_pdf(mixture_pdf, str(_output_directory), output_pattern, count)
+                    count += 1
+    pb.close()
     return
 
 
