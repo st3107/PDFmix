@@ -15,6 +15,7 @@ import yaml
 import xarray as xr
 import numpy as np
 from pyobjcryst.crystal import Crystal, CreateCrystalFromCIF
+from pyobjcryst import loadCrystal
 from pyobjcryst.scatteringpower import ScatteringPower
 from diffpy.srreal.pdfcalculator import PDFCalculator
 from diffpy.srfit.pdf import PDFGenerator
@@ -174,10 +175,10 @@ def find_all_files(
 
 
 def load_crystal(filename: str) -> Crystal:
-    with Path(filename).open("rb") as fb:
-        c = CreateCrystalFromCIF(fb)
-        # record the input cif in the cif_str
-        c.cif_str = fb.read()
+    _filename = Path(filename)
+    c = loadCrystal(str(_filename))
+    # record the input cif in the cif_str
+    c.cif_str = _filename.read_text()
     return c
 
 
