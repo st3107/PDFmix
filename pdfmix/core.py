@@ -325,7 +325,7 @@ def create_progress_bar(files: typing.List[str], config: PDFMixConfigParser) -> 
     nc = len(config.calc_settings)
     counts = ncomb * nf * ns * nc
     verbose = config.verbose
-    return tqdm.tqdm(total=counts, disable=(verbose == 0))
+    return tqdm.tqdm(total=counts, disable=(verbose == 0), desc="Progress")
 
 
 def create_mixture_pdf_files_from_cif_directory(
