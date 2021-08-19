@@ -1,6 +1,9 @@
 # List required packages in this file, one per line.
 pyobjcryst
 diffpy.srfit
+diffpy.srreal
+diffpy.utils
+diffpy.structure
 xarray
 pyyaml
 fire
