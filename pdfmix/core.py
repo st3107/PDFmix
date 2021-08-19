@@ -4,6 +4,7 @@ import itertools as it
 import copy
 import collections
 import tqdm
+from pprint import pformat
 from pathlib import PurePath, Path
 from configparser import ConfigParser
 from pkg_resources import resource_filename
@@ -66,9 +67,16 @@ def load_yaml(filename: str) -> dict:
     return dct
 
 
+def dump_yaml(filename: str, dct: dict) -> None:
+    with Path(filename).open("wb") as f:
+        yaml.safe_dump(dct, f)
+    return
+
+
 class PDFMixConfigParser:
 
     def __init__(self):
+        # default configuration
         self._calc_config: ConfigDict = {
             "rmin": [0.0],
             "rmax": [20.0],
@@ -90,21 +98,27 @@ class PDFMixConfigParser:
         self._other_config: ConfigDict = {
             "verbose": 1
         }
+        # attributes to hold the data
+        self.dct = dict()
         self.calc_settings: typing.List[CalculatorSetting] = []
         self.stru_settings: typing.List[StructureSetting] = []
         self.frac_combs: typing.List[typing.List[float]] = []
         self.verbose: int = 0
         self.n_phase: int = 0
+        # populate the attributes
         self.read_dict({})
 
     def read_dict(self, dct: dict) -> None:
-        dct = collections.ChainMap(
-            dct,
-            self._calc_config,
-            self._stru_config,
-            self._fracs_config,
-            self._other_config
+        dct = dict(
+            collections.ChainMap(
+                dct,
+                self._calc_config,
+                self._stru_config,
+                self._fracs_config,
+                self._other_config
+            )
         )
+        self.dct = dct
         # calculator settings
         self.calc_settings = get_settings(self._calc_config.keys(), dct)
         # structure settings
@@ -121,6 +135,14 @@ class PDFMixConfigParser:
         dct = load_yaml(filename) if filename else {}
         dct.update(kwargs)
         self.read_dict(dct)
+
+    def show(self) -> None:
+        print(pformat(self.dct))
+        return
+
+    def write(self, filename: str) -> None:
+        dump_yaml(filename, self.dct)
+        return
 
 
 def load_config(config_file: str, **kwargs) -> PDFMixConfigParser:
@@ -157,7 +179,7 @@ def serialize_crystals(
 
 def nCr(n: int, r: int) -> int:
     f = math.factorial
-    return f(n) // f(r) // f(n-r)
+    return f(n) // f(r) // f(n - r)
 
 
 def gen_file_combs_from_directory(
@@ -306,6 +328,24 @@ def create_mixture_pdf_files_from_cif_directory(
     return
 
 
+def show_default_config() -> None:
+    config = PDFMixConfigParser()
+    config.show()
+    return
+
+
+def write_default_config(filename: str) -> None:
+    config = PDFMixConfigParser()
+    config.write(filename)
+    return
+
+
 def cli():
-    fire.Fire(create_mixture_pdf_files_from_cif_directory)
+    fire.Fire(
+        {
+            "create": create_mixture_pdf_files_from_cif_directory,
+            "show": show_default_config,
+            "write": write_default_config
+        }
+    )
     return
