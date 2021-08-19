@@ -99,7 +99,7 @@ class PDFMixConfigParser:
             "verbose": 1
         }
         # attributes to hold the data
-        self.dct = dict()
+        self._dct = dict()
         self.calc_settings: typing.List[CalculatorSetting] = []
         self.stru_settings: typing.List[StructureSetting] = []
         self.frac_combs: typing.List[typing.List[float]] = []
@@ -118,7 +118,7 @@ class PDFMixConfigParser:
                 self._other_config
             )
         )
-        self.dct = dct
+        self._dct = dct
         # calculator settings
         self.calc_settings = get_settings(self._calc_config.keys(), dct)
         # structure settings
@@ -137,11 +137,11 @@ class PDFMixConfigParser:
         self.read_dict(dct)
 
     def show(self) -> None:
-        print(pformat(self.dct))
+        print(pformat(self._dct))
         return
 
     def write(self, filename: str) -> None:
-        dump_yaml(filename, self.dct)
+        dump_yaml(filename, self._dct)
         return
 
 
@@ -305,14 +305,16 @@ def create_counts(files: typing.List[str], config: PDFMixConfigParser) -> iter:
 
 def create_mixture_pdf_files_from_cif_directory(
         output_directory: str,
-        output_pattern: str = r"{:016d}.nc",
         input_directory: str = r"./",
+        output_pattern: str = r"{:016d}.nc",
         input_pattern: str = r"{[!.]*.cif}",
         config_file: str = None,
         **kwargs
 ) -> None:
+    _output_directory = Path(output_directory).expanduser()
+    _input_directory = Path(input_directory).expanduser()
     config = load_config(config_file, **kwargs)
-    files = find_all_files(input_directory, input_pattern)
+    files = find_all_files(str(_input_directory), input_pattern)
     counts = create_counts(files, config)
     file_combs = gen_file_combs_from_directory(config, files)
     frac_combs = config.frac_combs
@@ -324,7 +326,7 @@ def create_mixture_pdf_files_from_cif_directory(
                 for calc_setting in calc_settings:
                     count = next(counts)
                     mixture_pdf = create_mixture_pdf(file_comb, frac_comb, stru_setting, calc_setting)
-                    save_mixture_pdf(mixture_pdf, output_directory, output_pattern, count)
+                    save_mixture_pdf(mixture_pdf, str(_output_directory), output_pattern, count)
     return
 
 
