@@ -168,7 +168,7 @@ def find_all_files(
 ) -> typing.List[str]:
     _directory = Path(directory)
     fs = []
-    for f in _directory.rglob(pattern):
+    for f in _directory.glob(pattern):
         if f.is_file():
             fs.append(str(f))
     return fs
