@@ -62,14 +62,14 @@ def get_settings(keys: typing.Iterable[str], dct: typing.Union[dict, collections
 
 
 def load_yaml(filename: str) -> dict:
-    with Path(filename).open("rb") as f:
+    with Path(filename).open("r") as f:
         dct = yaml.safe_load(f)
     return dct
 
 
 def dump_yaml(filename: str, dct: dict) -> None:
-    with Path(filename).open("wb") as f:
-        yaml.safe_dump(dct, f)
+    with Path(filename).open("w") as f:
+        yaml.safe_dump(dct, f, width=80, indent=2, default_flow_style=False)
     return
 
 
