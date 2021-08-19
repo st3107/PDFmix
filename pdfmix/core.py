@@ -16,6 +16,9 @@ import numpy as np
 from pyobjcryst.crystal import Crystal, CreateCrystalFromCIF
 from pyobjcryst.scatteringpower import ScatteringPower
 from diffpy.srreal.pdfcalculator import PDFCalculator
+from diffpy.srfit.pdf import PDFGenerator
+from diffpy.srfit.structure.basestructureparset import BaseStructureParSet
+from diffpy.srfit.fitbase.parameterset import ParameterSet
 
 VarDict = typing.Dict[str, typing.Tuple[typing.List[str], typing.Any, typing.Dict[str, typing.Any]]]
 ConfigDict = typing.Dict[
@@ -34,24 +37,16 @@ class CalculatorSetting(dict):
     def to_var_dict(self) -> VarDict:
         dct = {}
         for k, v in self.items():
-            dct[k] = (["cparams"], v, NAME2ATTRS.get(k, {}))
+            dct[k] = ([k], [v], NAME2ATTRS.get(k, {}))
         return dct
 
 
 class StructureSetting(dict):
 
-    @property
-    def lat_scale(self):
-        return self["lat_scale"]
-
-    @property
-    def iso_adp(self):
-        return self["iso_adp"]
-
     def to_var_dict(self) -> VarDict:
         dct = {}
         for k, v in self.items():
-            dct[k] = (["sparams"], v, NAME2ATTRS.get(k, {}))
+            dct[k] = ([k], [v], NAME2ATTRS.get(k, {}))
         return dct
 
 
@@ -203,49 +198,10 @@ def gen_file_combs_from_directory(
         yield list(fc)
 
 
-def create_a_crystal(
-        filename: str,
-        stru_setting: StructureSetting
-) -> Crystal:
-    crystal = load_crystal(filename)
-    lat_scale = stru_setting.lat_scale
-    crystal.a *= lat_scale
-    crystal.b *= lat_scale
-    crystal.c *= lat_scale
-    iso_adp = stru_setting.iso_adp
-    for sp in crystal.GetScatteringPower():
-        sp: ScatteringPower
-        sp.SetBiso(iso_adp)
-    return crystal
-
-
 def create_crystals(
-        file_comb: typing.List[str],
-        stru_setting: StructureSetting
+        file_comb: typing.List[str]
 ) -> typing.List[Crystal]:
-    return [create_a_crystal(f, stru_setting) for f in file_comb]
-
-
-def create_pc(
-        calc_setting: CalculatorSetting
-) -> PDFCalculator:
-    return PDFCalculator(**calc_setting)
-
-
-def use_pc_to_create_mixture_pdf(
-        pc: PDFCalculator,
-        crystals: typing.List[Crystal],
-        fracs: typing.List[float]
-) -> typing.Tuple[np.ndarray, np.ndarray]:
-    n, m = len(crystals), len(fracs)
-    if n != m:
-        raise PDFMixError("Number of phases doesn't match the number of fractions: {} != {}.".format(n, m))
-    r0, g0 = pc(crystals[0])
-    g0 *= fracs[0]
-    for i in range(1, n):
-        _, g = pc(crystals[i])
-        g0 += g * fracs[i]
-    return r0, g0
+    return [load_crystal(f) for f in file_comb]
 
 
 def store_in_dataset(
@@ -281,15 +237,64 @@ def store_in_dataset(
     return ds
 
 
+def create_pg(
+        crystal: Crystal,
+        frac: float,
+        stru_setting: StructureSetting,
+        calc_setting: CalculatorSetting
+) -> PDFGenerator:
+    pg = PDFGenerator()
+    pg.setStructure(crystal)
+    pg.scale.setValue(frac)
+    pg.delta1.setValue(calc_setting["delta1"])
+    pg.delta2.setValue(calc_setting["delta2"])
+    pg.setQmax(calc_setting["qmax"])
+    pg.setQmin(calc_setting["qmin"])
+    pg.qdamp.setValue(calc_setting["qdamp"])
+    pg.qbroad.setValue(calc_setting["qbroad"])
+    phase: BaseStructureParSet = pg.phase
+    lat: ParameterSet = phase.getLattice()
+    lat.a.setValue(lat.a.getValue() * stru_setting["lat_scale"])
+    lat.b.setValue(lat.b.getValue() * stru_setting["lat_scale"])
+    lat.c.setValue(lat.c.getValue() * stru_setting["lat_scale"])
+    atoms = phase.getScatterers()
+    for atom in atoms:
+        atom.Biso.setValue(stru_setting["iso_adp"])
+    return pg
+
+
+def create_r(
+        calc_setting: CalculatorSetting
+) -> np.ndarray:
+    return np.arange(
+        calc_setting["rmin"],
+        calc_setting["rmax"],
+        calc_setting["rstep"]
+    )
+
+
+def calc_mixed_pdf(
+        crystals: typing.List[Crystal],
+        fracs: typing.List[float],
+        stru_setting: StructureSetting,
+        calc_setting: CalculatorSetting
+) -> typing.Tuple[np.ndarray, np.ndarray]:
+    r = create_r(calc_setting)
+    g = np.zeros_like(r)
+    for crystal, frac in zip(crystals, fracs):
+        pg = create_pg(crystal, frac, stru_setting, calc_setting)
+        g += pg(r)
+    return r, g
+
+
 def create_mixture_pdf(
         file_comb: typing.List[str],
         fracs: typing.List[float],
         stru_setting: StructureSetting,
         calc_setting: CalculatorSetting
 ) -> xr.Dataset:
-    crystals = create_crystals(file_comb, stru_setting)
-    pc = create_pc(calc_setting)
-    r, g = use_pc_to_create_mixture_pdf(pc, crystals, fracs)
+    crystals = create_crystals(file_comb)
+    r, g = calc_mixed_pdf(crystals, fracs, stru_setting, calc_setting)
     ds = store_in_dataset(r, g, crystals, fracs, stru_setting, calc_setting)
     return ds
 
