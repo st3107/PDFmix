@@ -341,8 +341,6 @@ def create_mixture_pdf_files_from_cif_directory(
     config = load_config(config_file, **kwargs)
     verbose = config.verbose
     files = find_all_files(str(_input_directory), input_pattern)
-    if verbose:
-        print("Find {} file(s) in the input directory.".format(len(files)))
     file_combs = gen_file_combs_from_directory(config, files)
     frac_combs = config.frac_combs
     stru_settings = config.stru_settings
@@ -352,7 +350,10 @@ def create_mixture_pdf_files_from_cif_directory(
         if verbose:
             print("Create the directory {}.".format(str(_output_directory)))
     if verbose:
-        print("Begin calculation.")
+        print(
+            "Find {} files in the input directory. "
+            "Generate PDFs from the mixtures of {} phases.".format(len(files), config.n_phase)
+        )
     pb = create_progress_bar(files, config)
     count = 0
     for file_comb in file_combs:
