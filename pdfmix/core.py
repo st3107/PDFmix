@@ -326,6 +326,14 @@ def create_progress_bar(files: typing.List[str], config: PDFMixConfigParser) -> 
     nc = len(config.calc_settings)
     counts = ncomb * nf * ns * nc
     verbose = config.verbose
+    if verbose:
+        print(
+            "Find {} files in the input directory. "
+            "Choose {} files to create a mixture phase. "
+            "For each mixture, there are {} sets of fractions, {} structure parameter sets, {} calculation "
+            "parameter sets. "
+            "In total, there are {} PDFs to calculate.".format(nfs, nph, nf, ns, nc, counts)
+        )
     return tqdm.tqdm(total=counts, disable=(verbose == 0), desc="Progress")
 
 
@@ -350,11 +358,6 @@ def create_mixture_pdf_files_from_cif_directory(
         _output_directory.mkdir(parents=True)
         if verbose:
             print("Create the directory {}.".format(str(_output_directory)))
-    if verbose:
-        print(
-            "Find {} files in the input directory. "
-            "Generate PDFs from the mixtures of {} phases.".format(len(files), config.n_phase)
-        )
     pb = create_progress_bar(files, config)
     count = 0
     for file_comb in file_combs:
