@@ -55,10 +55,22 @@ class StructureSetting(dict):
         return dct
 
 
-def get_settings(keys: typing.Iterable[str], dct: typing.Union[dict, collections.ChainMap]) -> typing.List:
+def get_CalculatorSettings(
+        keys: typing.Iterable[str],
+        dct: typing.Union[dict, collections.ChainMap]
+) -> typing.List:
     grids = [dct[key] for key in keys]
     coords = np.column_stack([c.flatten() for c in np.meshgrid(*grids)])
-    return [dict(zip(keys, c)) for c in coords]
+    return [CalculatorSetting(zip(keys, c)) for c in coords]
+
+
+def get_StructureSettings(
+        keys: typing.Iterable[str],
+        dct: typing.Union[dict, collections.ChainMap]
+) -> typing.List:
+    grids = [dct[key] for key in keys]
+    coords = np.column_stack([c.flatten() for c in np.meshgrid(*grids)])
+    return [StructureSetting(zip(keys, c)) for c in coords]
 
 
 def load_yaml(filename: str) -> dict:
@@ -120,9 +132,9 @@ class PDFMixConfigParser:
         )
         self._dct = dct
         # calculator settings
-        self.calc_settings = get_settings(self._calc_config.keys(), dct)
+        self.calc_settings = get_CalculatorSettings(self._calc_config.keys(), dct)
         # structure settings
-        self.stru_settings = get_settings(self._stru_config.keys(), dct)
+        self.stru_settings = get_StructureSettings(self._stru_config.keys(), dct)
         # phases and fractions
         self.frac_combs = dct["fracs"]
         if len(self.frac_combs) == 0:
@@ -295,7 +307,11 @@ def save_mixture_pdf(
 
 
 def create_counts(files: typing.List[str], config: PDFMixConfigParser) -> iter:
-    ncomb = nCr(len(files), config.n_phase)
+    nfs = len(files)
+    nph = config.n_phase
+    if nfs < nph:
+        raise PDFMixError("Number of cif files is smaller than number of phases: {} < {}".format(nfs, nph))
+    ncomb = nCr(nfs, nph)
     nf = len(config.frac_combs)
     ns = len(config.stru_settings)
     nc = len(config.calc_settings)
@@ -306,9 +322,9 @@ def create_counts(files: typing.List[str], config: PDFMixConfigParser) -> iter:
 def create_mixture_pdf_files_from_cif_directory(
         output_directory: str,
         input_directory: str = r"./",
-        output_pattern: str = r"{:016d}.nc",
-        input_pattern: str = r"{[!.]*.cif}",
         config_file: str = None,
+        output_pattern: str = r"{:016d}.nc",
+        input_pattern: str = r"[!.]*.cif",
         **kwargs
 ) -> None:
     _output_directory = Path(output_directory).expanduser()
