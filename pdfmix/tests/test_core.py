@@ -31,12 +31,13 @@ def test_write_default_config(tmp_path: Path):
 def test_create_mixture_pdf_files_from_cif_directory(tmp_path: Path):
     # create temp output directory
     temp_dir = tmp_path.joinpath("temp_output_ncs")
+    temp_dir.mkdir()
     temp_config_file = tmp_path.joinpath("temp_config.yaml")
     # create config file
     config = core.PDFMixConfigParser()
     qmaxs = [20.0, 30.0]
     fracs = [[0., 1.], [1., 0.]]
-    config.read_dict({"qmax": qmaxs, "fracs": fracs, "rmax": [10.0]})
+    config.read_dict({"qmax": qmaxs, "fracs": fracs, "rmax": [10.0], "verbose": 0})
     config.write(str(temp_config_file))
     # run functions
     core.create_mixture_pdf_files_from_cif_directory(
