@@ -351,10 +351,10 @@ def create_mixture_pdf_files_from_cif_directory(
         _output_directory.mkdir(parents=True)
         if verbose:
             print("Create the directory {}.".format(str(_output_directory)))
-    pb = create_progress_bar(files, config)
-    count = 0
     if verbose:
         print("Begin calculation.")
+    pb = create_progress_bar(files, config)
+    count = 0
     for file_comb in file_combs:
         for frac_comb in frac_combs:
             for stru_setting in stru_settings:
