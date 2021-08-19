@@ -82,7 +82,9 @@ def dump_yaml(filename: str, dct: dict) -> None:
 
 class PDFMixConfigParser:
 
-    def __init__(self):
+    def __init__(self, dct: dict = None):
+        if dct is None:
+            dct = {}
         # default configuration
         self._calc_config: ConfigDict = {
             "rmin": [0.0],
@@ -113,7 +115,7 @@ class PDFMixConfigParser:
         self.verbose: int = 0
         self.n_phase: int = 0
         # populate the attributes
-        self.read_dict({})
+        self.read_dict(dct)
 
     def read_dict(self, dct: dict) -> None:
         dct = dict(
