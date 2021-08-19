@@ -341,6 +341,7 @@ def create_mixture_pdf_files_from_cif_directory(
     frac_combs = config.frac_combs
     stru_settings = config.stru_settings
     calc_settings = config.calc_settings
+    _output_directory.mkdir(parents=True, exist_ok=True)
     for file_comb in file_combs:
         for frac_comb in frac_combs:
             for stru_setting in stru_settings:
