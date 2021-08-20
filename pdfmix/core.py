@@ -39,7 +39,7 @@ class CalculatorSetting(dict):
     def to_var_dict(self) -> VarDict:
         dct = {}
         for k, v in self.items():
-            dct[k] = ([k], [v], NAME2ATTRS.get(k, {}))
+            dct[k] = ([], v, NAME2ATTRS.get(k, {}))
         return dct
 
 
@@ -48,7 +48,7 @@ class StructureSetting(dict):
     def to_var_dict(self) -> VarDict:
         dct = {}
         for k, v in self.items():
-            dct[k] = ([k], [v], NAME2ATTRS.get(k, {}))
+            dct[k] = ([], v, NAME2ATTRS.get(k, {}))
         return dct
 
 
