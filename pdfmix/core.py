@@ -93,14 +93,14 @@ class PDFMixConfigParser:
             "rmax": [20.0],
             "rstep": [0.01],
             "qmin": [0.0],
-            "qmax": [23.0],
+            "qmax": [0.0],
             "qdamp": [0.0],
             "qbroad": [0.0],
             "delta1": [0.0],
             "delta2": [0.0]
         }
         self._stru_config: ConfigDict = {
-            "iso_adp": [0.02],
+            "iso_adp": [0.5],
             "lat_scale": [1.0]
         }
         self._fracs_config: ConfigDict = {
