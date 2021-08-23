@@ -281,9 +281,16 @@ def create_r(
     )
 
 
-def molar_to_scale(crystals: typing.List[Crystal], fracs: typing.List[float]) -> typing.List[float]:
+def molar_to_scale(crystals: typing.List[Crystal], fracs: typing.List[float]) -> np.ndarray:
     sfas = [SFAverage.fromStructure(c, "X").f1avg for c in crystals]
-    return [frac * math.pow(sfa, 2) for frac, sfa in zip(fracs, sfas)]
+    coeffs = np.asarray([frac * math.pow(sfa, 2) for frac, sfa in zip(fracs, sfas)])
+    div = coeffs.sum()
+    if div == 0.:
+        raise PDFMixError(
+            "The molar fractions are zero for this set of fracs '{}' "
+            "and this set of crystals '{}'.".format(fracs, crystals)
+        )
+    return np.divide(coeffs, div)
 
 
 def calc_mixed_pdf(
