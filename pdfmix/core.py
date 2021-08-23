@@ -375,6 +375,41 @@ def create_mixture_pdf_files_from_cif_directory(
         input_pattern: str = r"[!.]*.cif",
         **kwargs
 ) -> None:
+    """Create mixture PDFs using a collection of crystal structures.
+
+    The core functionality of the CLI is to generate a folder of PDF data files from a folder of CIF files.
+    The PDFs are the linear combination of PDFs calculated from individual CIF files. The coefficients are
+    calculated according to the molar fractions provided by the user. The calculation is done in a four layer
+    loop: for each combination of the CIF files, for each set of the molar fractions, for each set of
+    calculation settings, for each set of structure parameter settings, a PDF will be calculated. This PDF is a
+    simulated PDF of the mixture of phases at certain condition. If the combination only contains one file,
+    then this PDF is a simulated PDF from a single phase. The input files should all be in one folder. They
+    should be in CIF format. The output files will be in one folder specified by the user. They are NETCDF files.
+    The fractions to use, the calculation settings and the structure settings are the key configuration for the
+    simulation. The configuration is defined in key values pairs, where each key a parameter and each value is a
+    list of numbers. Because it is assumed multiple values will be used in the calculation, the numbers for one
+    parameter are stored in a list. Below shows the default configuration of the calculation. In default, one
+    "mixture" contains one phase (one CIF file) so it is a single phase PDF calculation.
+
+    Parameters
+    ----------
+    output_directory :
+        The output directory location.
+    input_directory :
+        The input directory location, default "./".
+    config_file :
+        The configuration yaml file location, if None, don't use it, default None.
+    output_pattern :
+        The output file name pattern in the python format string style, default r"{:d}.nc".
+    input_pattern :
+        The input file name pattern in the glob pattern style, used in searching, default r"[!.]*.cif".
+    kwargs :
+        The configuration to update.
+
+    Returns
+    -------
+    None.
+    """
     _output_directory = Path(output_directory).expanduser()
     _input_directory = Path(input_directory).expanduser()
     config = load_config(config_file, **kwargs)
@@ -403,18 +438,35 @@ def create_mixture_pdf_files_from_cif_directory(
 
 
 def show_default_config() -> None:
+    """Show the default configuration.
+
+    Returns
+    -------
+    None.
+    """
     config = PDFMixConfigParser()
     config.show()
     return
 
 
 def write_default_config(filename: str) -> None:
+    """Write out a configuration file serving as the template to edit.
+
+    Parameters
+    ----------
+    filename : str
+        The file name of the output yaml file.
+    Returns
+    -------
+    None.
+    """
     config = PDFMixConfigParser()
     config.write(filename)
     return
 
 
 def cli():
+    """The PDFmix CLI."""
     fire.Fire(
         {
             "create": create_mixture_pdf_files_from_cif_directory,
