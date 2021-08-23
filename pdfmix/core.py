@@ -358,7 +358,7 @@ def create_mixture_pdf_files_from_cif_directory(
         output_directory: str,
         input_directory: str = r"./",
         config_file: str = None,
-        output_pattern: str = r"{:016d}.nc",
+        output_pattern: str = r"{:d}.nc",
         input_pattern: str = r"[!.]*.cif",
         **kwargs
 ) -> None:
