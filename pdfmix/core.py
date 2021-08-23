@@ -21,6 +21,7 @@ from diffpy.srreal.pdfcalculator import PDFCalculator
 from diffpy.srfit.pdf import PDFGenerator
 from diffpy.srfit.structure.basestructureparset import BaseStructureParSet
 from diffpy.srfit.fitbase.parameterset import ParameterSet
+from diffpy.srreal.sfaverage import SFAverage
 
 VarDict = typing.Dict[str, typing.Tuple[typing.List[str], typing.Any, typing.Dict[str, typing.Any]]]
 ConfigDict = typing.Dict[
@@ -104,7 +105,8 @@ class PDFMixConfigParser:
             "lat_scale": [1.0]
         }
         self._fracs_config: ConfigDict = {
-            "fracs": [[1.0]]
+            "fracs": [[1.0]],
+            "ftype": "molar"
         }
         self._other_config: ConfigDict = {
             "verbose": 1
@@ -114,6 +116,7 @@ class PDFMixConfigParser:
         self.calc_settings: typing.List[CalculatorSetting] = []
         self.stru_settings: typing.List[StructureSetting] = []
         self.frac_combs: typing.List[typing.List[float]] = []
+        self.ftype: str = ""
         self.verbose: int = 0
         self.n_phase: int = 0
         # populate the attributes
@@ -139,6 +142,7 @@ class PDFMixConfigParser:
         if len(self.frac_combs) == 0:
             raise PDFMixError("There is no fraction list. Please add fraction config 'fracs'.")
         self.n_phase = len(self.frac_combs[0])
+        self.ftype = dct["ftype"]
         # set verbose
         self.verbose = dct["verbose"]
 
@@ -243,13 +247,13 @@ def store_in_dataset(
 
 def create_pg(
         crystal: Crystal,
-        frac: float,
+        scale: float,
         stru_setting: StructureSetting,
         calc_setting: CalculatorSetting
 ) -> PDFGenerator:
     pg = PDFGenerator()
     pg.setStructure(crystal)
-    pg.scale.setValue(frac)
+    pg.scale.setValue(scale)
     pg.delta1.setValue(calc_setting["delta1"])
     pg.delta2.setValue(calc_setting["delta2"])
     pg.setQmax(calc_setting["qmax"])
@@ -277,6 +281,11 @@ def create_r(
     )
 
 
+def molar_to_scale(crystals: typing.List[Crystal], fracs: typing.List[float]) -> typing.List[float]:
+    sfas = [SFAverage.fromStructure(c, "X").f1avg for c in crystals]
+    return [frac * math.pow(sfa, 2) for frac, sfa in zip(fracs, sfas)]
+
+
 def calc_mixed_pdf(
         crystals: typing.List[Crystal],
         fracs: typing.List[float],
@@ -285,8 +294,9 @@ def calc_mixed_pdf(
 ) -> typing.Tuple[np.ndarray, np.ndarray]:
     r = create_r(calc_setting)
     g = np.zeros_like(r)
-    for crystal, frac in zip(crystals, fracs):
-        pg = create_pg(crystal, frac, stru_setting, calc_setting)
+    scales = molar_to_scale(crystals, fracs)
+    for crystal, scale in zip(crystals, scales):
+        pg = create_pg(crystal, scale, stru_setting, calc_setting)
         g += pg(r)
     return r, g
 
