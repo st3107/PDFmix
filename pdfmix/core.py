@@ -17,6 +17,12 @@ from diffpy.srreal.sfaverage import SFAverage
 from pyobjcryst import loadCrystal
 from pyobjcryst.crystal import Crystal
 
+__all__ = [
+    "create_mixture_pdf_files_from_cif_directory",
+    "show_default_config",
+    "write_default_config"
+]
+
 VarDict = typing.Dict[str, typing.Tuple[typing.List[str], typing.Any, typing.Dict[str, typing.Any]]]
 ConfigDict = typing.Dict[
     str, typing.Union[str, int, float, list, typing.List[str], typing.List[int], typing.List[float], typing.List[
