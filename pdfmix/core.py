@@ -1,27 +1,21 @@
-import time
-import typing
-import math
-import itertools as it
-import copy
 import collections
-import tqdm
-from pprint import pformat
+import itertools as it
+import math
+import typing
 from pathlib import PurePath, Path
-from configparser import ConfigParser
-from pkg_resources import resource_filename
+from pprint import pformat
 
 import fire
-import yaml
-import xarray as xr
 import numpy as np
-from pyobjcryst.crystal import Crystal, CreateCrystalFromCIF
-from pyobjcryst import loadCrystal
-from pyobjcryst.scatteringpower import ScatteringPower
-from diffpy.srreal.pdfcalculator import PDFCalculator
+import tqdm
+import xarray as xr
+import yaml
+from diffpy.srfit.fitbase.parameterset import ParameterSet
 from diffpy.srfit.pdf import PDFGenerator
 from diffpy.srfit.structure.basestructureparset import BaseStructureParSet
-from diffpy.srfit.fitbase.parameterset import ParameterSet
 from diffpy.srreal.sfaverage import SFAverage
+from pyobjcryst import loadCrystal
+from pyobjcryst.crystal import Crystal
 
 VarDict = typing.Dict[str, typing.Tuple[typing.List[str], typing.Any, typing.Dict[str, typing.Any]]]
 ConfigDict = typing.Dict[

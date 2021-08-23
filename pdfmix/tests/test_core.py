@@ -1,8 +1,5 @@
-import copy
-import time
 from pathlib import Path
 
-import tqdm
 from pkg_resources import resource_filename
 
 import pdfmix.core as core
@@ -11,8 +8,8 @@ CIF_DIR = Path(resource_filename("pdfmix", "data/"))
 
 
 def test_nCr():
-    assert 1 is core.nCr(3, 3)
-    assert 10 is core.nCr(5, 2)
+    assert 1 == core.nCr(3, 3)
+    assert 10 == core.nCr(5, 2)
 
 
 def test_show_default_config():
