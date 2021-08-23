@@ -11,5 +11,4 @@ PDFmix Documentation
 
    installation
    usage_cli
-   api
    min_versions
