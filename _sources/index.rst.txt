@@ -10,6 +10,5 @@ PDFmix Documentation
    :maxdepth: 2
 
    installation
-   usage
-   release-history
+   usage_cli
    min_versions
