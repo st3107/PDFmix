@@ -28,7 +28,10 @@ ConfigDict = typing.Dict[
     str, typing.Union[str, int, float, list, typing.List[str], typing.List[int], typing.List[float], typing.List[
         list]]
 ]
-NAME2ATTRS = {}
+NAME2ATTRS = {
+    "G": {"standard_name": "G", "units": r"Å$^{-2}$"},
+    "r": {"standard_name": "r", "units": r"Å"}
+}
 
 
 class PDFMixError(Exception):
@@ -79,7 +82,7 @@ def load_yaml(filename: str) -> dict:
 
 def dump_yaml(filename: str, dct: dict) -> None:
     with Path(filename).open("w") as f:
-        yaml.safe_dump(dct, f, width=80, indent=2, default_flow_style=False)
+        yaml.safe_dump(dct, f, width=80, indent=2, default_flow_style=False, sort_keys=False)
     return
 
 
@@ -183,6 +186,8 @@ def load_crystal(filename: str) -> Crystal:
     c = loadCrystal(str(_filename))
     # record the input cif in the cif_str
     c.cif_str = _filename.read_text()
+    # record the file name
+    c.cif_name = _filename.stem
     return c
 
 
@@ -190,6 +195,12 @@ def serialize_crystals(
         crystals: typing.List[Crystal]
 ) -> typing.List[str]:
     return [c.cif_str for c in crystals]
+
+
+def get_fnames(
+        crystals: typing.List[Crystal]
+) -> typing.List[str]:
+    return [c.cif_name for c in crystals]
 
 
 def nCr(n: int, r: int) -> int:
@@ -226,8 +237,10 @@ def store_in_dataset(
         raise PDFMixError("Number of phases doesn't match the number of fractions: {} != {}.".format(n, m))
     phase = list(range(n))
     s_crystals = serialize_crystals(crystals)
+    fnames = get_fnames(crystals)
     data = {
         "G": (["r"], g, NAME2ATTRS.get("G", {})),
+        "fname": (["phase"], fnames, NAME2ATTRS.get("fname", {})),
         "fraction": (["phase"], fracs, NAME2ATTRS.get("fraction", {})),
         "structure": (["phase"], s_crystals, NAME2ATTRS.get("structure", {}))
     }
