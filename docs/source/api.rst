@@ -1,5 +1,5 @@
 Python APIs
 ===========
 
-.. automodule:: core
+.. automodule:: pdfmix.core
    :members:
