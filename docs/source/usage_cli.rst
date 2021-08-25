@@ -89,10 +89,10 @@ To know the syntax of the CLI, simple run the command below.
 
     [1mNAME[0m
         pdfmix create - Create mixture PDFs using a collection of crystal structures.
-    
+
     [1mSYNOPSIS[0m
         pdfmix create [4mOUTPUT_DIRECTORY[0m <flags>
-    
+
     [1mDESCRIPTION[0m
         The core functionality of the CLI is to generate a folder of PDF data files from a folder of CIF files.
         The PDFs are the linear combination of PDFs calculated from individual CIF files. The coefficients are
@@ -107,11 +107,11 @@ To know the syntax of the CLI, simple run the command below.
         list of numbers. Because it is assumed multiple values will be used in the calculation, the numbers for one
         parameter are stored in a list. Below shows the default configuration of the calculation. In default, one
         "mixture" contains one phase (one CIF file) so it is a single phase PDF calculation.
-    
+
     [1mPOSITIONAL ARGUMENTS[0m
         [1m[4mOUTPUT_DIRECTORY[0m[0m
             The output directory location.
-    
+
     [1mFLAGS[0m
         --input_directory=[4mINPUT_DIRECTORY[0m
             The input directory location, default "./".
@@ -123,7 +123,7 @@ To know the syntax of the CLI, simple run the command below.
             The input file name pattern in the glob pattern style, used in searching, default r"[!.]*.cif".
         Additional flags are accepted.
             The configuration to update.
-    
+
     [1mNOTES[0m
         You can also use flags syntax for POSITIONAL ARGUMENTS
 
@@ -177,7 +177,7 @@ In python, we load the one PDF data file and show what are inside the
 .. code:: ipython3
 
     import xarray as xr
-    
+
     ds0 = xr.load_dataset("./pdfs1/0.nc")
     print(ds0)
 
@@ -219,7 +219,7 @@ We visualize the PDF data here.
 
 
 
-.. image:: usage_cli_files/usage_cli_18_0.png
+.. image:: _static/usage_cli_18_0.png
 
 
 Use case: create the mixture PDFs
@@ -269,7 +269,7 @@ column is a set of molar fractions.
 
 
 
-.. image:: usage_cli_files/usage_cli_25_0.png
+.. image:: _static/usage_cli_25_0.png
 
 
 Use case: create mixture PDFs using different parameters
@@ -317,7 +317,7 @@ Each column is a combination of the “iso_adp” and “qmax” parameters.
 
 
 
-.. image:: usage_cli_files/usage_cli_32_0.png
+.. image:: _static/usage_cli_32_0.png
 
 
 Use case: use configuration file
@@ -398,7 +398,7 @@ first use case.
 
 
 
-.. image:: usage_cli_files/usage_cli_41_0.png
+.. image:: _static/usage_cli_41_0.png
 
 
 We can use the configuration file together with the parameters in
