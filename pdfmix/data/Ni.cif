@@ -215,4 +215,5 @@ loop_
  _atom_site_fract_y
  _atom_site_fract_z
  _atom_site_occupancy
-  Ni  Ni0  4  0.000000  0.000000  0.000000  1
+  Ni  Ni0  4  0.000000  0.000000  0.000000  0.5
+  D   Ni0  4  0.000000  0.000000  0.000000  0.5
