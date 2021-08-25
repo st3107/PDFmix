@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pkg_resources import resource_filename
 
+import xarray as xr
 import pdfmix.core as core
 
 CIF_DIR = Path(resource_filename("pdfmix", "data/"))
@@ -42,3 +43,23 @@ def test_create_mixture_pdf_files_from_cif_directory(tmp_path: Path):
     )
     # check output files
     assert len(list(temp_dir.glob("*.nc"))) == len(qmaxs) * len(fracs)
+
+
+def test_r_range_creation(tmp_path: Path):
+    # create temp output directory
+    temp_dir = tmp_path.joinpath("temp_output_ncs")
+    temp_dir.mkdir()
+    temp_config_file = tmp_path.joinpath("temp_config.yaml")
+    # create config file
+    config = core.PDFMixConfigParser()
+    config.read_dict({"fracs": [[0.5, 0.5]], "rmax": [10.0], "rstep": [0.1], "rmin": [2.0]})
+    config.write(str(temp_config_file))
+    # run functions
+    core.create_mixture_pdf_files_from_cif_directory(
+        str(temp_dir), str(CIF_DIR), config_file=str(temp_config_file)
+    )
+    # check output files
+    fs = list(temp_dir.glob("*.nc"))
+    assert len(fs) == 1
+    ds = xr.load_dataset(str(fs[0]))
+    assert ds["G"].shape == (80,)
