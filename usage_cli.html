@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Usage of the CLI &mdash; PDFmix 0.post1+g3d44a29 documentation</title>
+  <title>Usage of the CLI &mdash; PDFmix 0.post1+g479079c documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.post1+g3d44a29
+                0.post1+g479079c
               </div>
             
           
@@ -230,7 +230,7 @@ single phase PDF calculation.</p>
  <span class="s1">&#39;delta2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
  <span class="s1">&#39;fracs&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">1.0</span><span class="p">]],</span>
  <span class="s1">&#39;ftype&#39;</span><span class="p">:</span> <span class="s1">&#39;molar&#39;</span><span class="p">,</span>
- <span class="s1">&#39;iso_adp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span>
+ <span class="s1">&#39;iso_adp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.006</span><span class="p">],</span>
  <span class="s1">&#39;lat_scale&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
  <span class="s1">&#39;qbroad&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
  <span class="s1">&#39;qdamp&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
@@ -304,11 +304,11 @@ single phase PDF calculation.</p>
 <p>The line below shows how to calculate PDFs from a folder “./cifs” of CIF
 files using the default configuration and save the results in the
 “./pdfs1” folder.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> pdfmix create <span class="s2">&quot;./pdfs1&quot;</span> <span class="s2">&quot;./cifs&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> pdfmix create <span class="s2">&quot;./pdfs1&quot;</span> <span class="s2">&quot;./cifs&quot;</span> --iso_adp<span class="o">=</span><span class="s2">&quot;[0.006]&quot;</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Find 3 files in the input directory. Choose 1 files to create a mixture phase. For each mixture, there are 1 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 3 PDFs to calculate.
-Progress: 100%|███████████████████████████████████| 3/3 [00:00&lt;00:00,  3.49it/s]
+Progress: 100%|███████████████████████████████████| 3/3 [00:00&lt;00:00,  7.03it/s]
 </pre></div>
 </div>
 <p>The line below lists the generated PDF data files. There are three
@@ -333,11 +333,11 @@ Coordinates:
   * r          (r) float64 0.0 0.01 0.02 0.03 0.04 ... 19.96 19.97 19.98 19.99
   * phase      (phase) int32 0
 Data variables:
-    G          (r) float64 0.0 -0.001102 -0.002204 ... 1.565 1.769 1.957
+    G          (r) float64 0.0 -0.001102 -0.002204 ... 1.611 1.825 2.021
     structure  (phase) object &quot;# generated using pymatgenndata_Csn_symmetry...
     fname      (phase) object 'Cs'
     fraction   (phase) float64 1.0
-    iso_adp    float64 0.5
+    iso_adp    float64 0.006
     lat_scale  float64 1.0
     rmin       float64 0.0
     rmax       float64 20.0
@@ -378,7 +378,7 @@ PDF. Then, there should be 9 PDF calculated in total.</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Find 3 files in the input directory. Choose 2 files to create a mixture phase. For each mixture, there are 3 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 9 PDFs to calculate.
-Progress: 100%|███████████████████████████████████| 9/9 [00:02&lt;00:00,  4.26it/s]
+Progress: 100%|███████████████████████████████████| 9/9 [00:01&lt;00:00,  8.52it/s]
 </pre></div>
 </div>
 <p>Here, we show the PDFs. Each row is a combination of phase and each
@@ -406,11 +406,11 @@ different sets of molar fractions and for each set, we will use
 different “is_adp” and “qmax”. There are two “iso_adp” and two “qmax” to
 use. In total, we will have 2 <span class="math notranslate nohighlight">\(\times\)</span> 2 <span class="math notranslate nohighlight">\(\times\)</span> 2 = 8
 PDFs.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> pdfmix create <span class="s2">&quot;./pdfs3&quot;</span> <span class="s2">&quot;./cifs&quot;</span> --fracs<span class="o">=</span><span class="s2">&quot;[[0.2,0.6,0.2],[0.4,0.2,0.4]]&quot;</span> --iso_adp<span class="o">=</span><span class="s2">&quot;[0.4,1.6]&quot;</span> --qmax<span class="o">=</span><span class="s2">&quot;[20.0,40.0]&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> pdfmix create <span class="s2">&quot;./pdfs3&quot;</span> <span class="s2">&quot;./cifs&quot;</span> --fracs<span class="o">=</span><span class="s2">&quot;[[0.2,0.6,0.2],[0.4,0.2,0.4]]&quot;</span> --iso_adp<span class="o">=</span><span class="s2">&quot;[0.004,0.036]&quot;</span> --qmax<span class="o">=</span><span class="s2">&quot;[20.0,40.0]&quot;</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Find 3 files in the input directory. Choose 3 files to create a mixture phase. For each mixture, there are 2 sets of fractions, 2 structure parameter sets, 2 calculation parameter sets. In total, there are 8 PDFs to calculate.
-Progress: 100%|███████████████████████████████████| 8/8 [00:05&lt;00:00,  1.55it/s]
+Progress: 100%|███████████████████████████████████| 8/8 [00:01&lt;00:00,  6.04it/s]
 </pre></div>
 </div>
 <p>Here, we show the PDFs. One row is the a combination of molar fractions.
@@ -444,7 +444,7 @@ inside to create our own configuration.</p>
 <span class="o">-</span> <span class="o">-</span> <span class="mf">1.0</span>
 <span class="n">ftype</span><span class="p">:</span> <span class="n">molar</span>
 <span class="n">iso_adp</span><span class="p">:</span>
-<span class="o">-</span> <span class="mf">0.5</span>
+<span class="o">-</span> <span class="mf">0.006</span>
 <span class="n">lat_scale</span><span class="p">:</span>
 <span class="o">-</span> <span class="mf">1.0</span>
 <span class="n">rmin</span><span class="p">:</span>
@@ -473,7 +473,7 @@ command. Here, in this example, we didn’t change any parameters.</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Find 3 files in the input directory. Choose 1 files to create a mixture phase. For each mixture, there are 1 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 3 PDFs to calculate.
-Progress: 100%|███████████████████████████████████| 3/3 [00:00&lt;00:00,  6.80it/s]
+Progress: 100%|███████████████████████████████████| 3/3 [00:00&lt;00:00,  8.78it/s]
 </pre></div>
 </div>
 <p>As we expect, the results are the same as the first run we made in the
