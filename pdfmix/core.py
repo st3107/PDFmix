@@ -449,7 +449,7 @@ def create_mixture_pdf_files_from_cif_directory(
     input_pattern :
         The input file name pattern in the glob pattern style, used in searching, default r"[!.]*.cif".
     kwargs :
-        The configuration to update.
+        The configuration to update. The name of the variables can be viewed by the `pdfmix show`.
 
     Returns
     -------
