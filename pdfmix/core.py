@@ -111,7 +111,7 @@ class PDFMixConfigParser:
             "delta2": [0.0]
         }
         self._stru_config: ConfigDict = {
-            "iso_adp": [0.06],
+            "iso_adp": [0.006],
             "lat_scale": [1.0]
         }
         self._fracs_config: ConfigDict = {
