@@ -63,7 +63,7 @@ single phase PDF calculation.
      'delta2': [0.0],
      'fracs': [[1.0]],
      'ftype': 'molar',
-     'iso_adp': [0.5],
+     'iso_adp': [0.006],
      'lat_scale': [1.0],
      'qbroad': [0.0],
      'qdamp': [0.0],
@@ -89,10 +89,10 @@ To know the syntax of the CLI, simple run the command below.
 
     [1mNAME[0m
         pdfmix create - Create mixture PDFs using a collection of crystal structures.
-
+    
     [1mSYNOPSIS[0m
         pdfmix create [4mOUTPUT_DIRECTORY[0m <flags>
-
+    
     [1mDESCRIPTION[0m
         The core functionality of the CLI is to generate a folder of PDF data files from a folder of CIF files.
         The PDFs are the linear combination of PDFs calculated from individual CIF files. The coefficients are
@@ -107,11 +107,11 @@ To know the syntax of the CLI, simple run the command below.
         list of numbers. Because it is assumed multiple values will be used in the calculation, the numbers for one
         parameter are stored in a list. Below shows the default configuration of the calculation. In default, one
         "mixture" contains one phase (one CIF file) so it is a single phase PDF calculation.
-
+    
     [1mPOSITIONAL ARGUMENTS[0m
         [1m[4mOUTPUT_DIRECTORY[0m[0m
             The output directory location.
-
+    
     [1mFLAGS[0m
         --input_directory=[4mINPUT_DIRECTORY[0m
             The input directory location, default "./".
@@ -123,7 +123,7 @@ To know the syntax of the CLI, simple run the command below.
             The input file name pattern in the glob pattern style, used in searching, default r"[!.]*.cif".
         Additional flags are accepted.
             The configuration to update.
-
+    
     [1mNOTES[0m
         You can also use flags syntax for POSITIONAL ARGUMENTS
 
@@ -149,13 +149,13 @@ files using the default configuration and save the results in the
 
 .. code:: ipython3
 
-    ! pdfmix create "./pdfs1" "./cifs"
+    ! pdfmix create "./pdfs1" "./cifs" --iso_adp="[0.006]"
 
 
 .. parsed-literal::
 
     Find 3 files in the input directory. Choose 1 files to create a mixture phase. For each mixture, there are 1 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 3 PDFs to calculate.
-    Progress: 100%|███████████████████████████████████| 3/3 [00:00<00:00,  3.49it/s]
+    Progress: 100%|███████████████████████████████████| 3/3 [00:00<00:00,  7.03it/s]
 
 
 The line below lists the generated PDF data files. There are three
@@ -177,7 +177,7 @@ In python, we load the one PDF data file and show what are inside the
 .. code:: ipython3
 
     import xarray as xr
-
+    
     ds0 = xr.load_dataset("./pdfs1/0.nc")
     print(ds0)
 
@@ -190,11 +190,11 @@ In python, we load the one PDF data file and show what are inside the
       * r          (r) float64 0.0 0.01 0.02 0.03 0.04 ... 19.96 19.97 19.98 19.99
       * phase      (phase) int32 0
     Data variables:
-        G          (r) float64 0.0 -0.001102 -0.002204 ... 1.565 1.769 1.957
+        G          (r) float64 0.0 -0.001102 -0.002204 ... 1.611 1.825 2.021
         structure  (phase) object "# generated using pymatgen\ndata_Cs\n_symmetry...
         fname      (phase) object 'Cs'
         fraction   (phase) float64 1.0
-        iso_adp    float64 0.5
+        iso_adp    float64 0.006
         lat_scale  float64 1.0
         rmin       float64 0.0
         rmax       float64 20.0
@@ -219,7 +219,7 @@ We visualize the PDF data here.
 
 
 
-.. image:: _static/usage_cli_18_0.png
+.. image:: usage_cli_files/usage_cli_18_0.png
 
 
 Use case: create the mixture PDFs
@@ -253,7 +253,7 @@ PDF. Then, there should be 9 PDF calculated in total.
 .. parsed-literal::
 
     Find 3 files in the input directory. Choose 2 files to create a mixture phase. For each mixture, there are 3 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 9 PDFs to calculate.
-    Progress: 100%|███████████████████████████████████| 9/9 [00:02<00:00,  4.26it/s]
+    Progress: 100%|███████████████████████████████████| 9/9 [00:01<00:00,  8.52it/s]
 
 
 Here, we show the PDFs. Each row is a combination of phase and each
@@ -269,7 +269,7 @@ column is a set of molar fractions.
 
 
 
-.. image:: _static/usage_cli_25_0.png
+.. image:: usage_cli_files/usage_cli_25_0.png
 
 
 Use case: create mixture PDFs using different parameters
@@ -295,13 +295,13 @@ PDFs.
 
 .. code:: ipython3
 
-    ! pdfmix create "./pdfs3" "./cifs" --fracs="[[0.2,0.6,0.2],[0.4,0.2,0.4]]" --iso_adp="[0.4,1.6]" --qmax="[20.0,40.0]"
+    ! pdfmix create "./pdfs3" "./cifs" --fracs="[[0.2,0.6,0.2],[0.4,0.2,0.4]]" --iso_adp="[0.004,0.036]" --qmax="[20.0,40.0]"
 
 
 .. parsed-literal::
 
     Find 3 files in the input directory. Choose 3 files to create a mixture phase. For each mixture, there are 2 sets of fractions, 2 structure parameter sets, 2 calculation parameter sets. In total, there are 8 PDFs to calculate.
-    Progress: 100%|███████████████████████████████████| 8/8 [00:05<00:00,  1.55it/s]
+    Progress: 100%|███████████████████████████████████| 8/8 [00:01<00:00,  6.04it/s]
 
 
 Here, we show the PDFs. One row is the a combination of molar fractions.
@@ -317,7 +317,7 @@ Each column is a combination of the “iso_adp” and “qmax” parameters.
 
 
 
-.. image:: _static/usage_cli_32_0.png
+.. image:: usage_cli_files/usage_cli_32_0.png
 
 
 Use case: use configuration file
@@ -348,7 +348,7 @@ inside to create our own configuration.
     - - 1.0
     ftype: molar
     iso_adp:
-    - 0.5
+    - 0.006
     lat_scale:
     - 1.0
     rmin:
@@ -382,7 +382,7 @@ command. Here, in this example, we didn’t change any parameters.
 .. parsed-literal::
 
     Find 3 files in the input directory. Choose 1 files to create a mixture phase. For each mixture, there are 1 sets of fractions, 1 structure parameter sets, 1 calculation parameter sets. In total, there are 3 PDFs to calculate.
-    Progress: 100%|███████████████████████████████████| 3/3 [00:00<00:00,  6.80it/s]
+    Progress: 100%|███████████████████████████████████| 3/3 [00:00<00:00,  8.78it/s]
 
 
 As we expect, the results are the same as the first run we made in the
@@ -398,7 +398,7 @@ first use case.
 
 
 
-.. image:: _static/usage_cli_41_0.png
+.. image:: usage_cli_files/usage_cli_41_0.png
 
 
 We can use the configuration file together with the parameters in
