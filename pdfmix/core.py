@@ -111,7 +111,7 @@ class PDFMixConfigParser:
             "delta2": [0.0]
         }
         self._stru_config: ConfigDict = {
-            "iso_adp": [0.5],
+            "iso_adp": [0.06],
             "lat_scale": [1.0]
         }
         self._fracs_config: ConfigDict = {
@@ -325,7 +325,7 @@ def create_pg(
     lat.c.setValue(lat.c.getValue() * stru_setting["lat_scale"])
     atoms = phase.getScatterers()
     for atom in atoms:
-        atom.Biso.setValue(stru_setting["iso_adp"])
+        atom.Uiso.setValue(stru_setting["iso_adp"])
     return pg
 
 
