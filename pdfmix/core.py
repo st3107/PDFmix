@@ -11,13 +11,12 @@ import tqdm
 import xarray as xr
 import yaml
 from diffpy.srfit.fitbase.parameterset import ParameterSet
-from diffpy.srfit.fitbase.parameter import Parameter
 from diffpy.srfit.pdf import PDFGenerator
 from diffpy.srfit.structure.basestructureparset import BaseStructureParSet
 from diffpy.srreal.sfaverage import SFAverage
+from diffpy.structure import Structure, Atom, loadStructure
 from pyobjcryst import loadCrystal
 from pyobjcryst.crystal import Crystal as CrystalObj
-from diffpy.structure import Structure, Atom, loadStructure
 
 __all__ = [
     "create_mixture_pdf_files_from_cif_directory",
