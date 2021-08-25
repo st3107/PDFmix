@@ -11,11 +11,13 @@ import tqdm
 import xarray as xr
 import yaml
 from diffpy.srfit.fitbase.parameterset import ParameterSet
+from diffpy.srfit.fitbase.parameter import Parameter
 from diffpy.srfit.pdf import PDFGenerator
 from diffpy.srfit.structure.basestructureparset import BaseStructureParSet
 from diffpy.srreal.sfaverage import SFAverage
 from pyobjcryst import loadCrystal
-from pyobjcryst.crystal import Crystal
+from pyobjcryst.crystal import Crystal as CrystalObj
+from diffpy.structure import Structure, Atom, loadStructure
 
 __all__ = [
     "create_mixture_pdf_files_from_cif_directory",
@@ -23,6 +25,7 @@ __all__ = [
     "write_default_config"
 ]
 
+Crystal = typing.Union[CrystalObj, Structure]
 VarDict = typing.Dict[str, typing.Tuple[typing.List[str], typing.Any, typing.Dict[str, typing.Any]]]
 ConfigDict = typing.Dict[
     str, typing.Union[str, int, float, list, typing.List[str], typing.List[int], typing.List[float], typing.List[
@@ -31,6 +34,10 @@ ConfigDict = typing.Dict[
 NAME2ATTRS = {
     "G": {"standard_name": "G", "units": r"Å$^{-2}$"},
     "r": {"standard_name": "r", "units": r"Å"}
+}
+NAME2NAME = {
+    "D": "H",
+    "T": "H"
 }
 
 
@@ -181,9 +188,19 @@ def find_all_files(
     return fs
 
 
-def load_crystal(filename: str) -> Crystal:
+def load_crystal(filename: str) -> CrystalObj:
     _filename = Path(filename)
     c = loadCrystal(str(_filename))
+    # record the input cif in the cif_str
+    c.cif_str = _filename.read_text()
+    # record the file name
+    c.cif_name = _filename.stem
+    return c
+
+
+def load_structure(filename: str) -> Structure:
+    _filename = Path(filename)
+    c = loadStructure(str(_filename))
     # record the input cif in the cif_str
     c.cif_str = _filename.read_text()
     # record the file name
@@ -220,7 +237,7 @@ def gen_file_combs_from_directory(
 def create_crystals(
         file_comb: typing.List[str]
 ) -> typing.List[Crystal]:
-    return [load_crystal(f) for f in file_comb]
+    return [load_structure(f) for f in file_comb]
 
 
 def store_in_dataset(
@@ -256,6 +273,34 @@ def store_in_dataset(
     )
     ds = xr.Dataset(data, coords=coords)
     return ds
+
+
+def only_letters(s: str) -> str:
+    return ''.join([c for c in s if c.isalpha()])
+
+
+def rename_elem(elem: str) -> str:
+    return NAME2NAME.get(elem, elem)
+
+
+def bleach_atom(atom: Atom) -> None:
+    elem_v = atom.element
+    elem_v = only_letters(elem_v)
+    elem_v = rename_elem(elem_v)
+    atom.element = elem_v
+    return
+
+
+def bleach_structure(stru: Structure) -> None:
+    for atom in stru:
+        bleach_atom(atom)
+    return
+
+
+def bleach_crystals(crystals: typing.List[Crystal]) -> None:
+    for c in crystals:
+        bleach_structure(c)
+    return
 
 
 def create_pg(
@@ -314,6 +359,7 @@ def calc_mixed_pdf(
 ) -> typing.Tuple[np.ndarray, np.ndarray]:
     r = create_r(calc_setting)
     g = np.zeros_like(r)
+    bleach_crystals(crystals)
     scales = molar_to_scale(crystals, fracs)
     for crystal, scale in zip(crystals, scales):
         pg = create_pg(crystal, scale, stru_setting, calc_setting)
