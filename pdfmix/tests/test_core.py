@@ -3,6 +3,7 @@ from pathlib import Path
 from pkg_resources import resource_filename
 
 import xarray as xr
+import numpy as np
 import pdfmix.core as core
 
 CIF_DIR = Path(resource_filename("pdfmix", "data/"))
@@ -52,7 +53,20 @@ def test_r_range_creation(tmp_path: Path):
     temp_config_file = tmp_path.joinpath("temp_config.yaml")
     # create config file
     config = core.PDFMixConfigParser()
-    config.read_dict({"fracs": [[0.5, 0.5]], "rmax": [10.0], "rstep": [0.1], "rmin": [2.0]})
+    rmax, rmin, rstep = 30.0, 1.5, 0.1
+    config.read_dict(
+        {
+            "fracs": [[0.5, 0.5]],
+            "rmax": [rmax],
+            "rstep": [rstep],
+            "rmin": [rmin],
+            "qmin": [0.5],
+            "qmax": [23.0, 25.0],
+            "qdamp": [0.04],
+            "qbroad": [0.01],
+            "iso_adp": [0.008]
+        }
+    )
     config.write(str(temp_config_file))
     # run functions
     core.create_mixture_pdf_files_from_cif_directory(
@@ -60,6 +74,11 @@ def test_r_range_creation(tmp_path: Path):
     )
     # check output files
     fs = list(temp_dir.glob("*.nc"))
-    assert len(fs) == 1
-    ds = xr.load_dataset(str(fs[0]))
-    assert ds["G"].shape == (80,)
+    assert len(fs) > 0
+    r = np.arange(rmin, rmax, rstep)
+    ds0 = xr.load_dataset(str(fs[0]))
+    assert ds0["G"].shape == r.shape
+    for f in fs[1:]:
+        ds = xr.load_dataset(str(f))
+        assert ds["G"].shape == r.shape
+        assert not ds0["G"].equals(ds["G"])
