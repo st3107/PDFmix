@@ -1,9 +1,9 @@
 from pathlib import Path
 
+import numpy as np
+import xarray as xr
 from pkg_resources import resource_filename
 
-import xarray as xr
-import numpy as np
 import pdfmix.core as core
 
 CIF_DIR = Path(resource_filename("pdfmix", "data/"))

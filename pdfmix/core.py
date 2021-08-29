@@ -2,6 +2,7 @@ import collections
 import itertools as it
 import math
 import typing
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import PurePath, Path
 from pprint import pformat
 
@@ -17,8 +18,6 @@ from diffpy.srreal.sfaverage import SFAverage
 from diffpy.structure import Structure, Atom, loadStructure
 from pyobjcryst import loadCrystal
 from pyobjcryst.crystal import Crystal as CrystalObj
-from concurrent.futures import ProcessPoolExecutor
-
 
 __all__ = [
     "create_mixture_pdf_files_from_cif_directory",
@@ -404,7 +403,7 @@ def process_file_comb(
         pattern: str,
         count: int
 ) -> None:
-    mixed_pdf = create_mixture_pdf(file_comb, fracs, stru_setting,calc_setting)
+    mixed_pdf = create_mixture_pdf(file_comb, fracs, stru_setting, calc_setting)
     save_mixture_pdf(mixed_pdf, directory, pattern, count)
     return
 
