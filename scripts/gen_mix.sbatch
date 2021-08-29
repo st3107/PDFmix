@@ -7,6 +7,5 @@
 #SBATCH --time 0-8:00:00
 #SBATCH --job-name pdfmix
 
-source activate research
 echo "Python Interpreter:" $(which python)
 python gen_mix.py
