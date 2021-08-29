@@ -17,6 +17,8 @@ from diffpy.srreal.sfaverage import SFAverage
 from diffpy.structure import Structure, Atom, loadStructure
 from pyobjcryst import loadCrystal
 from pyobjcryst.crystal import Crystal as CrystalObj
+from concurrent.futures import ProcessPoolExecutor
+
 
 __all__ = [
     "create_mixture_pdf_files_from_cif_directory",
@@ -118,7 +120,8 @@ class PDFMixConfigParser:
             "ftype": "molar"
         }
         self._other_config: ConfigDict = {
-            "verbose": 1
+            "verbose": 1,
+            "ncpu": 1
         }
         # attributes to hold the data
         self._dct = dict()
@@ -128,6 +131,7 @@ class PDFMixConfigParser:
         self.ftype: str = ""
         self.verbose: int = 0
         self.n_phase: int = 0
+        self.ncpu: int = 1
         # populate the attributes
         self.read_dict(dct)
 
@@ -154,6 +158,7 @@ class PDFMixConfigParser:
         self.ftype = dct["ftype"]
         # set verbose
         self.verbose = dct["verbose"]
+        self.ncpu = dct["ncpu"]
 
     def read(self, filename: str = None, **kwargs) -> None:
         dct = load_yaml(filename) if filename else {}
@@ -390,7 +395,21 @@ def save_mixture_pdf(
     return
 
 
-def create_progress_bar(files: typing.List[str], config: PDFMixConfigParser) -> tqdm.tqdm:
+def process_file_comb(
+        file_comb: typing.List[str],
+        fracs: typing.List[float],
+        stru_setting: StructureSetting,
+        calc_setting: CalculatorSetting,
+        directory: str,
+        pattern: str,
+        count: int
+) -> None:
+    mixed_pdf = create_mixture_pdf(file_comb, fracs, stru_setting,calc_setting)
+    save_mixture_pdf(mixed_pdf, directory, pattern, count)
+    return
+
+
+def total_counts(files: typing.List[str], config: PDFMixConfigParser) -> int:
     nfs = len(files)
     nph = config.n_phase
     if nfs < nph:
@@ -400,16 +419,11 @@ def create_progress_bar(files: typing.List[str], config: PDFMixConfigParser) -> 
     ns = len(config.stru_settings)
     nc = len(config.calc_settings)
     counts = ncomb * nf * ns * nc
-    verbose = config.verbose
-    if verbose:
-        print(
-            "Find {} files in the input directory. "
-            "Choose {} files to create a mixture phase. "
-            "For each mixture, there are {} sets of fractions, {} structure parameter sets, {} calculation "
-            "parameter sets. "
-            "In total, there are {} PDFs to calculate.".format(nfs, nph, nf, ns, nc, counts)
-        )
-    return tqdm.tqdm(total=counts, disable=(verbose == 0), desc="Progress")
+    return counts
+
+
+def create_progress_bar(counts: int, verbose: int, dec: str) -> tqdm.tqdm:
+    return tqdm.tqdm(total=counts, disable=(verbose == 0), desc=dec)
 
 
 def create_mixture_pdf_files_from_cif_directory(
@@ -466,19 +480,40 @@ def create_mixture_pdf_files_from_cif_directory(
     calc_settings = config.calc_settings
     if not _output_directory.is_dir():
         _output_directory.mkdir(parents=True)
-        if verbose:
-            print("Create the directory {}.".format(str(_output_directory)))
-    pb = create_progress_bar(files, config)
-    count = 0
-    for file_comb in file_combs:
-        for frac_comb in frac_combs:
-            for stru_setting in stru_settings:
-                for calc_setting in calc_settings:
-                    pb.update()
-                    mixture_pdf = create_mixture_pdf(file_comb, frac_comb, stru_setting, calc_setting)
-                    save_mixture_pdf(mixture_pdf, str(_output_directory), output_pattern, count)
-                    count += 1
-    pb.close()
+    tc = total_counts(files, config)
+    if config.ncpu <= 1:
+        pb = create_progress_bar(tc, verbose, "Processing")
+        count = 0
+        for file_comb in file_combs:
+            for frac_comb in frac_combs:
+                for stru_setting in stru_settings:
+                    for calc_setting in calc_settings:
+                        pb.update()
+                        process_file_comb(file_comb, frac_comb, stru_setting, calc_setting,
+                                          str(_output_directory), output_pattern, count)
+                        count += 1
+        pb.close()
+    else:
+        count = 0
+        pb1 = create_progress_bar(tc, verbose, "Create tasks:")
+        executor = ProcessPoolExecutor(max_workers=config.ncpu)
+        tasks = []
+        for file_comb in file_combs:
+            for frac_comb in frac_combs:
+                for stru_setting in stru_settings:
+                    for calc_setting in calc_settings:
+                        pb1.update()
+                        task = executor.submit(process_file_comb, file_comb, frac_comb, stru_setting,
+                                               calc_setting, str(_output_directory), output_pattern, count)
+                        count += 1
+                        tasks.append(task)
+        pb1.close()
+        pb2 = create_progress_bar(tc, verbose, "Processing tasks:")
+        for task in tasks:
+            pb2.update()
+            task.result()
+        pb2.close()
+        executor.shutdown()
     return
 
 
