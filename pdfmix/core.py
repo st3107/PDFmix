@@ -1,6 +1,7 @@
 import collections
 import itertools as it
 import math
+import random
 import typing
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import PurePath, Path
@@ -120,7 +121,8 @@ class PDFMixConfigParser:
         }
         self._other_config: ConfigDict = {
             "verbose": 1,
-            "ncpu": 1
+            "ncpu": 1,
+            "nrandom": 0
         }
         # attributes to hold the data
         self._dct = dict()
@@ -128,9 +130,11 @@ class PDFMixConfigParser:
         self.stru_settings: typing.List[StructureSetting] = []
         self.frac_combs: typing.List[typing.List[float]] = []
         self.ftype: str = ""
+        # other cofig
         self.verbose: int = 0
         self.n_phase: int = 0
         self.ncpu: int = 1
+        self.nrandom: int = 0
         # populate the attributes
         self.read_dict(dct)
 
@@ -158,6 +162,7 @@ class PDFMixConfigParser:
         # set verbose
         self.verbose = dct["verbose"]
         self.ncpu = dct["ncpu"]
+        self.nrandom = dct["nrandom"]
 
     def read(self, filename: str = None, **kwargs) -> None:
         dct = load_yaml(filename) if filename else {}
@@ -233,8 +238,15 @@ def gen_file_combs_from_directory(
         files: typing.List[str]
 ) -> typing.Generator[typing.List[str], None, None]:
     n = config.n_phase
-    for fc in it.combinations(files, n):
-        yield list(fc)
+    nrandom = config.nrandom
+    nfs = len(files)
+    if nrandom <= 0:
+        index_iter = it.combinations(range(nfs), n)
+    else:
+        index_iter = (random.sample(range(nfs), n) for _ in range(nrandom))
+    for index in index_iter:
+        yield [files[i] for i in index]
+    return
 
 
 def create_crystals(
@@ -413,7 +425,8 @@ def total_counts(files: typing.List[str], config: PDFMixConfigParser) -> int:
     nph = config.n_phase
     if nfs < nph:
         raise PDFMixError("Number of cif files is smaller than number of phases: {} < {}".format(nfs, nph))
-    ncomb = nCr(nfs, nph)
+    nrandom = config.nrandom
+    ncomb = nCr(nfs, nph) if nrandom <= 0 else nrandom
     nf = len(config.frac_combs)
     ns = len(config.stru_settings)
     nc = len(config.calc_settings)
@@ -474,12 +487,12 @@ def create_mixture_pdf_files_from_cif_directory(
     verbose = config.verbose
     files = find_all_files(str(_input_directory), input_pattern)
     file_combs = gen_file_combs_from_directory(config, files)
+    tc = total_counts(files, config)
     frac_combs = config.frac_combs
     stru_settings = config.stru_settings
     calc_settings = config.calc_settings
     if not _output_directory.is_dir():
         _output_directory.mkdir(parents=True)
-    tc = total_counts(files, config)
     if config.ncpu <= 1:
         pb = create_progress_bar(tc, verbose, "Processing")
         count = 0
