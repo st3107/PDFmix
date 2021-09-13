@@ -46,6 +46,26 @@ def test_create_mixture_pdf_files_from_cif_directory(tmp_path: Path):
     assert len(list(temp_dir.glob("*.nc"))) == len(qmaxs) * len(fracs)
 
 
+def test_random(tmp_path: Path):
+    # create temp output directory
+    temp_dir = tmp_path.joinpath("temp_output_ncs")
+    temp_dir.mkdir()
+    temp_config_file = tmp_path.joinpath("temp_config.yaml")
+    # create config file
+    config = core.PDFMixConfigParser()
+    qmaxs = [20.0, 30.0]
+    fracs = [[0., 1.], [1., 0.]]
+    nrandom = 2
+    config.read_dict({"qmax": qmaxs, "fracs": fracs, "rmax": [10.0], "verbose": 0, "nrandom": nrandom})
+    config.write(str(temp_config_file))
+    # run functions
+    core.create_mixture_pdf_files_from_cif_directory(
+        str(temp_dir), str(CIF_DIR), config_file=str(temp_config_file)
+    )
+    # check output files
+    assert len(list(temp_dir.glob("*.nc"))) == nrandom * len(qmaxs) * len(fracs)
+
+
 def test_r_range_creation(tmp_path: Path):
     # create temp output directory
     temp_dir = tmp_path.joinpath("temp_output_ncs")

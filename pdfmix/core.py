@@ -243,9 +243,21 @@ def gen_file_combs_from_directory(
     if nrandom <= 0:
         index_iter = it.combinations(range(nfs), n)
     else:
-        index_iter = (random.sample(range(nfs), n) for _ in range(nrandom))
+        index_iter = random_combs(nfs, n, nrandom)
     for index in index_iter:
         yield [files[i] for i in index]
+    return
+
+
+def random_combs(n: int, r: int, k: int) -> typing.Generator[typing.Tuple, None, None]:
+    seen = set()
+    count = 0
+    while count < k:
+        tup = tuple(random.sample(range(n), r))
+        if tup not in seen:
+            seen.add(tup)
+            count += 1
+            yield tup
     return
 
 
